@@ -923,6 +923,7 @@ Never commit real API keys, secrets, passwords, or other credentials to Git.
 - Appwrite database configured
 - Appwrite Storage bucket configured
 - Required environment variables
+- A postgres DB either on cloud or using docker
 ### Install Dependencies
 ~~~bash
 bun install
