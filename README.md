@@ -1,5 +1,6 @@
 # Secure Login System — Authentication & File Access
 A secure authentication and file-access backend built with Express, TypeScript, Bun, Appwrite, Zod, and Argon2. The project implements user registration, login, session-based authentication, logout, protected user details, user-specific file access, file ownership checks, and separation between file metadata and actual file storage.
+Another is the Appwrite Bakcned implementation of all the operations.
 The project was developed as part of the Secure Login System with User Details & File Access assignment. The supplied `index.html` is used as the testing client; no separate frontend GUI is required.
 ## Features
 - User registration with email and password
@@ -35,32 +36,41 @@ The project was developed as part of the Secure Login System with User Details &
 | Argon2 | Password hashing |
 | Prisma | Database/data-access layer used by the application |
 ## Architecture
-The application uses the supplied HTML testing client to communicate with the backend. The backend handles authentication, authorization, validation, metadata resolution, and access to Appwrite services.
+The application uses the supplied HTML testing client to communicate with the backend. The express backend handles authentication, authorization, validation, metadata resolution, etc, whole the Appwrite adapter file talks to the appwrite adapter which handles all appwrite operations, thus, 2 seperate implementations.
 ~~~text
-                         ┌─────────────────────┐
-                         │     index.html      │
-                         │    Test Client      │
-                         └──────────┬──────────┘
-                                    │
-                                    │ HTTP
-                                    ▼
-                         ┌─────────────────────┐
-                         │    Express API      │
-                         │     TypeScript      │
-                         └──────────┬──────────┘
-                                    │
-                    ┌───────────────┼────────────────┐
-                    │               │                │
-                    ▼               ▼                ▼
-             ┌────────────┐  ┌────────────┐  ┌────────────┐
-             │    Auth    │  │  Database  │  │  Storage   │
-             │  Appwrite  │  │  Appwrite  │  │  Appwrite  │
-             └────────────┘  └────────────┘  └────────────┘
-                    │               │                │
-                    ▼               ▼                ▼
-                Sessions        Metadata        Actual files
+
+                              ┌──────────────────────┐
+                              │      index.html      │
+                              │     Test Client      │
+                              └──────────┬───────────┘
+                                         │
+                       ┌─────────────────┴─────────────────┐
+                       │                                   │
+                    HTTP Request                    Direct function call
+                       │                                   │
+                       ▼                                   ▼
+              ┌──────────────────┐             ┌─────────────────────────┐
+              │   Express API    │             │ appwrite-adapter.js     │
+              │    TypeScript    │             │    Appwrite Adapter     │
+              └────────┬─────────┘             └────────────┬────────────┘
+                       │                                    │
+              ┌────────┼────────┐                           │
+              │        │        │                           │
+              ▼        ▼        ▼                           ▼
+          ┌───────┐ ┌──────┐ ┌────────────┐        ┌─────────────────┐
+          │ Auth  │ │Zod   │ │  Prisma    │        │    Appwrite     │
+          │Routes │ │Valid.│ │ PostgreSQL │        └────────┬────────┘
+          └───────┘ └──────┘ └────────────┘                 │
+                                                            │
+                                                     ┌──────┴───────┐
+                                                     │              │
+                                                     ▼              ▼
+                                              ┌────────────┐ ┌─────────────┐
+                                              │  Database  │ │   Storage   │
+                                              │  Metadata  │ │ Actual Files│
+                                              └────────────┘ └─────────────┘
 ~~~
-The important architectural distinction is that authentication and authorization are handled at the application/API boundary, while Appwrite provides the underlying infrastructure.
+
 ## Project Structure
 The project is organized so that routes, middleware, validation, types, and Appwrite-specific functionality are separated rather than putting the entire backend into one file.
 ~~~text
@@ -78,6 +88,7 @@ The project is organized so that routes, middleware, validation, types, and Appw
 │   ├── migrations/
 │   └── schema.prisma
 ├── storage/
+├── appwrite/appwrite-adapter.js
 ├── lib/
 │   └── prisma.ts
 ├── .gitignore
@@ -87,7 +98,7 @@ The project is organized so that routes, middleware, validation, types, and Appw
 ├── tsconfig.json
 └── README.md
 ~~~
-The exact directory organization may evolve as the Appwrite adapter is further modularized.
+
 ## Authentication Flow
 The authentication flow begins when the browser sends credentials to the backend.
 ~~~text
@@ -177,7 +188,7 @@ The application does not decrypt passwords because password hashing is not encry
 ### Why Argon2 instead of bcrypt?
 Argon2 is a modern password-hashing algorithm designed specifically for password storage. One of its important properties is that it is memory-hard, meaning password verification deliberately requires memory as well as computational work.
 This makes large-scale password cracking more expensive, particularly when attackers use specialized hardware.
-bcrypt is also a strong and widely used password-hashing algorithm, but Argon2 provides a more modern memory-hard design and is the algorithm selected for this project.
+bcrypt is also a strong and widely used password-hashing algorithm, but Argon2 provides a more modern memory-hard design and I learned about it in my Intro to Cyber Security subject, so used it over bcrypt.
 ~~~text
 Encryption:
 Plaintext → Encryption → Ciphertext
