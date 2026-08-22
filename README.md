@@ -904,12 +904,14 @@ Configuration should be provided through environment variables rather than hard-
 Create a `.env` file based on the project's environment configuration.
 Typical configuration includes:
 ~~~env
-APPWRITE_ENDPOINT=
-APPWRITE_PROJECT_ID=
-APPWRITE_API_KEY=
-APPWRITE_DATABASE_ID=
-APPWRITE_BUCKET_ID=
-SESSION_SECRET=
+
+DATABASE_URL=
+PROJECT_ID=
+PROJECT_ENDPOINT=
+DATABASE_ID=
+FILES_TABLE_ID=
+BUCKET_ID=
+
 ~~~
 The exact variable names used by the implementation should match the project's existing environment configuration.
 Never commit real API keys, secrets, passwords, or other credentials to Git.
