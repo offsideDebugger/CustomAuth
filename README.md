@@ -1,4 +1,4 @@
-# Secure Login System — Authentication & File Access
+# Secure Login System - Authentication & File Access
 A secure authentication and file-access backend built with Express, TypeScript, Bun, Appwrite, Zod, and Argon2. The project implements user registration, login, session-based authentication, logout, protected user details, user-specific file access, file ownership checks, and separation between file metadata and actual file storage.
 Another is the Appwrite Bakcned implementation of all the operations.
 The project was developed as part of the Secure Login System with User Details & File Access assignment. The supplied `index.html` is used as the testing client; no separate frontend GUI is required.
