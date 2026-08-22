@@ -23,7 +23,7 @@ router.post("/register", async (req, res) => {
 
   if (existingUser) {
     return res.status(409).json({
-      error: "Unable to register with these details",
+      error: "Unable to register with these details as user already exists",
     });
   }
 
